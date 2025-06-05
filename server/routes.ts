@@ -1,6 +1,5 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Empty API routes - ready for development
@@ -8,8 +7,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Health check endpoint
   app.get("/api/health", (req, res) => {
-    res.json({ 
-      status: "ok", 
+    res.json({
+      status: "ok",
       message: "Server is running and ready for development",
       timestamp: new Date().toISOString()
     });
@@ -24,12 +23,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         environment: "development"
       },
       backend: {
-        status: "connected", 
+        status: "connected",
         port: 5000,
         environment: "development"
-      },
-      database: {
-        status: "not configured"
       }
     });
   });

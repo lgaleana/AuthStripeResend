@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Code, Server, Database, ArrowRight } from "lucide-react";
+import { Loader2, Code, Server, ArrowRight } from "lucide-react";
 
 interface StatusData {
   frontend: {
@@ -14,9 +14,6 @@ interface StatusData {
     status: string;
     port: number;
     environment: string;
-  };
-  database: {
-    status: string;
   };
 }
 
@@ -131,12 +128,6 @@ export default function Home() {
                 <span className="text-sm font-mono text-green-600">Basic setup</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                <span className="text-sm text-slate-600">Database</span>
-                <span className="text-sm font-mono text-slate-400">
-                  {isLoading ? "..." : status?.database?.status || "None"}
-                </span>
-              </div>
-              <div className="flex justify-between items-center py-2">
                 <span className="text-sm text-slate-600">Middleware</span>
                 <span className="text-sm font-mono text-slate-400">Minimal</span>
               </div>
@@ -158,9 +149,6 @@ export default function Home() {
             <div className="text-slate-400 mb-2">├── server/</div>
             <div className="text-slate-400 mb-2 ml-4">├── routes.ts</div>
             <div className="text-slate-400 mb-2 ml-4">├── index.ts</div>
-            <div className="text-slate-400 mb-2 ml-4">└── storage.ts</div>
-            <div className="text-slate-400 mb-2">├── shared/</div>
-            <div className="text-slate-400 mb-2 ml-4">└── schema.ts</div>
             <div className="text-slate-400">└── README.md</div>
           </div>
         </Card>
