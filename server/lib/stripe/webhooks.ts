@@ -1,12 +1,12 @@
-import Stripe from 'stripe';
+import Stripe from "stripe";
 
-import { stripe } from './config';
-import { updateUserProfileByAdmin } from '../supabase/admin/profiles';
+import { stripe } from "./config";
+import { updateUserProfileByAdmin } from "../supabase/admin/profiles";
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 if (!endpointSecret) {
-    throw new Error('Missing STRIPE_WEBHOOK_SECRET environment variable');
+    throw new Error("Missing STRIPE_WEBHOOK_SECRET environment variable");
 }
 
 export interface WebhookHandlerParams {
@@ -14,6 +14,12 @@ export interface WebhookHandlerParams {
     signature: string;
 }
 
+/*
+    WARNING!!!
+    The Webhook payload must be provided as a string or a
+    Buffer (https://nodejs.org/api/buffer.html) instance representing
+    the _raw_ request body
+*/
 export async function handleWebhook({
     body,
     signature,
@@ -22,16 +28,24 @@ export async function handleWebhook({
 
     // Verify webhook signature and parse event
     try {
-        event = stripe.webhooks.constructEvent(body, signature, endpointSecret!);
+        event = stripe.webhooks.constructEvent(
+            body,
+            signature,
+            endpointSecret!,
+        );
     } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-        throw new Error(`Webhook signature verification failed: ${errorMessage}`);
+        const errorMessage =
+            err instanceof Error ? err.message : "Unknown error";
+        throw new Error(
+            `Webhook signature verification failed: ${errorMessage}`,
+        );
     }
 
     // Handle different event types
     switch (event.type) {
-        case 'customer.subscription.created':
-            const createdSubscription = event.data.object as Stripe.Subscription;
+        case "customer.subscription.created":
+            const createdSubscription = event.data
+                .object as Stripe.Subscription;
             console.log(`Subscription created: ${createdSubscription.status}`);
             await handleSubscriptionCreated(createdSubscription);
             break;
@@ -40,18 +54,26 @@ export async function handleWebhook({
     }
 }
 
-export async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
+export async function handleSubscriptionCreated(
+    subscription: Stripe.Subscription,
+) {
     // Update user profile with the subscription key
     const userId = subscription.metadata?.user_id;
     const subscriptionKey = subscription.metadata?.subscription_key;
     if (!userId) {
-        throw new Error(`No user_id in subscription metadata: ${subscription.id}`);
+        throw new Error(
+            `No user_id in subscription metadata: ${subscription.id}`,
+        );
     }
     if (!subscriptionKey) {
-        throw new Error(`No price_lookup_key in subscription metadata: ${subscription.id}`);
+        throw new Error(
+            `No price_lookup_key in subscription metadata: ${subscription.id}`,
+        );
     }
     await updateUserProfileByAdmin(userId, {
         stripe_subscription_key: subscriptionKey,
     });
-    console.log(`Updated profile for user ${userId} with subscription ${subscription.id} for plan ${subscriptionKey}`);
+    console.log(
+        `Updated profile for user ${userId} with subscription ${subscription.id} for plan ${subscriptionKey}`,
+    );
 }

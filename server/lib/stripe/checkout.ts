@@ -1,6 +1,6 @@
-import { stripe } from './config';
-import { getActiveCustomerSubscriptions } from './subscriptions';
-import { findOrCreateStripeCustomer as findOrCreateCustomer } from './customers';
+import { stripe } from "./config";
+import { getActiveCustomerSubscriptions } from "./subscriptions";
+import { findOrCreateStripeCustomer as findOrCreateCustomer } from "./customers";
 
 export interface CreateCheckoutSessionParams {
     userId: string;
@@ -11,15 +11,9 @@ export interface CreateCheckoutSessionParams {
 
 export interface CheckoutSessionResult {
     url: string | null;
-    status: 'success' | 'already_subscribed';
+    status: "success" | "already_subscribed";
 }
 
-/*
-    WARNING!!!
-    The Webhook payload must be provided as a string or a
-    Buffer (https://nodejs.org/api/buffer.html) instance representing
-    the _raw_ request body
-*/
 export async function createCheckoutSession({
     userId,
     priceId,
@@ -34,12 +28,14 @@ export async function createCheckoutSession({
         customerId: customer.id,
     });
     if (activeSubscriptions.length > 0) {
-        console.log(`User ${userId} attempted to create checkout session but already has ${activeSubscriptions.length} active subscription(s)`);
-        return { url: null, status: 'already_subscribed' };
+        console.log(
+            `User ${userId} attempted to create checkout session but already has ${activeSubscriptions.length} active subscription(s)`,
+        );
+        return { url: null, status: "already_subscribed" };
     }
 
     const session = await stripe.checkout.sessions.create({
-        billing_address_collection: 'auto',
+        billing_address_collection: "auto",
         customer: customer.id,
         metadata: {
             user_id: userId,
@@ -57,9 +53,9 @@ export async function createCheckoutSession({
                 quantity: 1,
             },
         ],
-        mode: 'subscription',
+        mode: "subscription",
         success_url: successUrl,
         cancel_url: cancelUrl,
     });
-    return { url: session.url!, status: 'success' };
-} 
+    return { url: session.url!, status: "success" };
+}
