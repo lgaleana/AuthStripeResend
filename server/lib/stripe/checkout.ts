@@ -9,12 +9,23 @@ export interface CreateCheckoutSessionParams {
     cancelUrl: string;
 }
 
+export interface CheckoutSessionResult {
+    url: string | null;
+    status: 'success' | 'already_subscribed';
+}
+
+/*
+    WARNING!!!
+    The Webhook payload must be provided as a string or a
+    Buffer (https://nodejs.org/api/buffer.html) instance representing
+    the _raw_ request body
+*/
 export async function createCheckoutSession({
     userId,
     priceId,
     successUrl,
     cancelUrl,
-}: CreateCheckoutSessionParams): Promise<string | null> {
+}: CreateCheckoutSessionParams): Promise<CheckoutSessionResult> {
     // Find or create customer to avoid duplicates
     const customer = await findOrCreateCustomer(userId);
 
@@ -23,7 +34,8 @@ export async function createCheckoutSession({
         customerId: customer.id,
     });
     if (activeSubscriptions.length > 0) {
-        return null;
+        console.log(`User ${userId} attempted to create checkout session but already has ${activeSubscriptions.length} active subscription(s)`);
+        return { url: null, status: 'already_subscribed' };
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -49,5 +61,5 @@ export async function createCheckoutSession({
         success_url: successUrl,
         cancel_url: cancelUrl,
     });
-    return session.url!;
+    return { url: session.url!, status: 'success' };
 } 
