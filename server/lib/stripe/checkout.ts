@@ -1,6 +1,6 @@
-import { stripe } from "./config";
-import { getActiveCustomerSubscriptions } from "./subscriptions";
-import { findOrCreateStripeCustomer as findOrCreateCustomer } from "./customers";
+import { stripe } from './config';
+import { getActiveCustomerSubscriptions } from './subscriptions';
+import { findOrCreateStripeCustomer } from './customers';
 
 export interface CreateCheckoutSessionParams {
     userId: string;
@@ -21,7 +21,7 @@ export async function createCheckoutSession({
     cancelUrl,
 }: CreateCheckoutSessionParams): Promise<CheckoutSessionResult> {
     // Find or create customer to avoid duplicates
-    const customer = await findOrCreateCustomer(userId);
+    const customer = await findOrCreateStripeCustomer(userId);
 
     // Check for existing active subscriptions to prevent duplicates
     const activeSubscriptions = await getActiveCustomerSubscriptions({
